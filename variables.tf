@@ -43,6 +43,7 @@ variable "memory_reservation" {
 }
 
 variable "container_port" {
+  type    = number
   default = 0
 }
 
