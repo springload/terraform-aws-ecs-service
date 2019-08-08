@@ -11,6 +11,11 @@ variable "target_group_name" {
   default     = ""
 }
 
+variable "target_group_names" {
+  description = "Names of the ALB target groups. Defaults to the `[cluster_name]` if not set"
+  default     = []
+}
+
 variable "environment" {
   description = "Enviropnment vars to pass to the container. Note: they will be visible in the task definition, so please don't pass any secrets here."
   type        = map
@@ -80,8 +85,9 @@ variable "desired_count" {
 }
 
 locals {
-  balanced          = var.container_port > 0
-  target_group_name = coalesce(var.target_group_name, var.cluster_name)
+  balanced = var.container_port > 0
+
+  target_group_names = coalescelist(distinct(compact(concat(var.target_group_names, list(var.target_group_name)))), list(var.cluster_name))
 
   default_log_configuration = {
     "logDriver" = "awslogs"

@@ -29,8 +29,6 @@ resource "aws_ecs_service" "service" {
   deployment_minimum_healthy_percent = var.deployment_minimum_healthy_percent
   deployment_maximum_percent         = var.deployment_maximum_percent
 
-  iam_role = local.balanced ? aws_iam_role.task-role-alb[0].arn : ""
-
   ordered_placement_strategy {
     type  = "spread"
     field = "attribute:ecs.availability-zone"
@@ -42,10 +40,10 @@ resource "aws_ecs_service" "service" {
   }
 
   dynamic "load_balancer" {
-    for_each = local.balanced ? [1] : []
+    for_each = local.balanced ? data.aws_lb_target_group.TG[*].arn : []
 
     content {
-      target_group_arn = data.aws_lb_target_group.TG[0].arn
+      target_group_arn = load_balancer.value
       container_name   = var.service_name
       container_port   = var.container_port
     }
