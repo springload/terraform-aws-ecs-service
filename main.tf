@@ -1,6 +1,6 @@
 resource "aws_ecs_task_definition" "task" {
   family = "${var.cluster_name}-${var.service_name}"
-  container_definitions = jsonencode([
+  container_definitions = jsonencode([for s in concat([
     {
       name              = var.service_name
       image             = var.image
@@ -8,13 +8,20 @@ resource "aws_ecs_task_definition" "task" {
       essential         = var.essential
       memory            = var.memory
       memoryReservation = var.memory_reservation
-      portMappings      = local.balanced ? coalescelist(var.port_mappings, local.defaultPortMappings) : []
       mountPoints       = []
-      logConfiguration  = local.log_configuration
-      environment       = [for k in sort(keys(var.environment)) : { "name" : k, "value" : var.environment[k] }]
       volumesFrom       = []
     }
-  ])
+    ], var.additional_container_definitions) : merge(s, {
+    environment = [for k in sort(keys(var.environment)) : { "name" : k, "value" : var.environment[k] }]
+    # leverage the new terraform syntax and override the awslogs-stream-prefix
+    logConfiguration = merge(local.log_configuration,
+      local.log_configuration["logDriver"] == "awslogs" && local.log_configuration["options"] != null ? {
+        options = merge(local.log_configuration["options"], { "awslogs-stream-prefix" = s.name })
+      } : {}
+    )
+    # load balancer the local.load_balancer_container_name
+    portMappings = local.balanced && local.load_balancer_container_name == s.name ? coalescelist(var.port_mappings, local.defaultPortMappings) : []
+  })])
 
   task_role_arn = var.task_role_arn
 
@@ -44,7 +51,7 @@ resource "aws_ecs_service" "service" {
 
     content {
       target_group_arn = load_balancer.value
-      container_name   = var.service_name
+      container_name   = local.load_balancer_container_name
       container_port   = var.container_port
     }
   }

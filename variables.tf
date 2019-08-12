@@ -52,6 +52,17 @@ variable "container_port" {
   default = 0
 }
 
+variable "load_balancer_container_name" {
+  description = "Name of the container that will used by the load balancer. Can be used to put nginx proxy in front of the app. Defaults to the service name"
+  type        = string
+  default     = ""
+}
+
+variable "additional_container_definitions" {
+  type    = list(any)
+  default = []
+}
+
 variable "task_role_arn" {
   type    = string
   default = ""
@@ -85,7 +96,8 @@ variable "desired_count" {
 }
 
 locals {
-  balanced = var.container_port > 0
+  balanced                     = var.container_port > 0
+  load_balancer_container_name = coalesce(var.load_balancer_container_name, var.service_name)
 
   target_group_names = coalescelist(distinct(compact(concat(var.target_group_names, list(var.target_group_name)))), list(var.cluster_name))
 
