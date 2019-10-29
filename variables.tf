@@ -16,6 +16,7 @@ variable "target_group_names" {
   default     = []
 }
 
+
 variable "environment" {
   description = "Enviropnment vars to pass to the container. Note: they will be visible in the task definition, so please don't pass any secrets here."
   type        = map
@@ -94,6 +95,12 @@ variable "deployment_maximum_percent" {
 variable "desired_count" {
   default = 1
 }
+
+variable "init_process_enabled" {
+  description = "Use embdedded to Docker tini init process that correctly reaps zombie processes"
+  default     = true
+}
+
 
 locals {
   balanced                     = var.container_port > 0

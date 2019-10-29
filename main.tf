@@ -10,6 +10,9 @@ resource "aws_ecs_task_definition" "task" {
       memoryReservation = var.memory_reservation
       mountPoints       = []
       volumesFrom       = []
+      linuxParameters = {
+        initProcessEnabled = var.init_process_enabled
+      }
     }
     ], var.additional_container_definitions) : merge(s, {
     environment = [for k in sort(keys(var.environment)) : { "name" : k, "value" : var.environment[k] }]
