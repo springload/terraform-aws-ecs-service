@@ -8,11 +8,13 @@ resource "aws_ecs_task_definition" "task" {
       essential         = var.essential
       memory            = var.memory
       memoryReservation = var.memory_reservation
-      mountPoints       = []
+      mountPoints       = var.readonlyRootFilesystem ? [{ sourceVolume = "tmp", containerPath = "/tmp" }] : []
       volumesFrom       = []
       linuxParameters = {
         initProcessEnabled = var.init_process_enabled
       }
+      readonlyRootFilesystem = var.readonlyRootFilesystem
+      user                   = var.user
     }
     ], var.additional_container_definitions) : merge(s, {
     environment = [for k in sort(keys(var.environment)) : { "name" : k, "value" : var.environment[k] }]
@@ -28,6 +30,17 @@ resource "aws_ecs_task_definition" "task" {
 
   task_role_arn = var.task_role_arn
 
+  # the /tmp volume is needed if the root fs is readonly
+  # tmpfs takes precious memory, so it's easier to create a volume
+  dynamic "volume" {
+    for_each = var.readonlyRootFilesystem ? [{}] : []
+    content {
+      name = "tmp"
+      docker_volume_configuration {
+        scope = "task"
+      }
+    }
+  }
 }
 
 

@@ -82,6 +82,12 @@ variable "log_configuration" {
   default = { logDriver = "", options = {} }
 }
 
+variable "readonlyRootFilesystem" {
+  type        = bool
+  description = "Enforce read-only access to the file system inside of the Docker container"
+  default     = false
+}
+
 variable "deployment_minimum_healthy_percent" {
   description = "Minimum number of healty contianers during deployments"
   default     = 50
@@ -93,12 +99,20 @@ variable "deployment_maximum_percent" {
 }
 
 variable "desired_count" {
+  type    = number
   default = 1
 }
 
 variable "init_process_enabled" {
+  type        = bool
   description = "Use embdedded to Docker tini init process that correctly reaps zombie processes"
   default     = true
+}
+
+variable "user" {
+  type        = string
+  description = "Run container as the specified user. Formats are: user, user:group, uid, uid:gid, user:gid, uid:group"
+  default     = ""
 }
 
 
