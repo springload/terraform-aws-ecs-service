@@ -14,7 +14,7 @@ resource "aws_ecs_task_definition" "task" {
         initProcessEnabled = var.init_process_enabled
       }
       readonlyRootFilesystem = var.readonlyRootFilesystem
-      user                   = var.user
+      user                   = var.user != "" ? var.user : null
     }
     ], var.additional_container_definitions) : merge(s, {
     environment = [for k in sort(keys(var.environment)) : { "name" : k, "value" : var.environment[k] }]
