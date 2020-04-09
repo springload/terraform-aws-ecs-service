@@ -28,6 +28,22 @@ resource "aws_ecs_task_definition" "task" {
     portMappings = local.balanced && local.load_balancer_container_name == s.name ? coalescelist(var.port_mappings, local.defaultPortMappings) : []
   })])
 
+  dynamic "volume" {
+    for_each = [for efs_vol in var.efs_volumes : {
+      name           = "${var.cluster_name}-${efs_vol.efs_id}"
+      efs_id         = efs_vol.efs_id
+      root_directory = efs_vol.root_dir ? efs_vol.root_dir : "/opt/data"
+    }]
+
+    content {
+      name = volume.value.name
+      efs_volume_configuration {
+        file_system_id = volume.value.efs_id
+        root_directory = volume.value.root_directory
+      }
+    }
+  }
+
   task_role_arn = var.task_role_arn
 
   # the /tmp volume is needed if the root fs is readonly

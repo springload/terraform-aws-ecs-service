@@ -115,6 +115,11 @@ variable "user" {
   default     = ""
 }
 
+variable "efs_volumes" {
+  description = "Optional list of efs volumes, which are a map with {efs_id:, root_dir:}"
+  type        = list(map(string))
+  default     = {}
+}
 
 locals {
   balanced                     = var.container_port > 0
