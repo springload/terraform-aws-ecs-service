@@ -32,7 +32,7 @@ resource "aws_ecs_task_definition" "task" {
     for_each = [for efs_vol in var.efs_volumes : {
       name           = "${var.cluster_name}-${efs_vol.efs_id}"
       efs_id         = efs_vol.efs_id
-      root_directory = efs_vol.root_dir ? efs_vol.root_dir : "/opt/data"
+      root_directory = lookup(efs_vol, "root_dir", "/opt/data")
     }]
 
     content {
