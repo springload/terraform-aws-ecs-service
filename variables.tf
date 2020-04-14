@@ -118,7 +118,7 @@ variable "user" {
 variable "efs_volumes" {
   description = "Optional list of efs volumes, which are a map with {efs_id:, root_dir:}"
   type        = list(map(string))
-  default     = {}
+  default     = []
 }
 
 locals {
