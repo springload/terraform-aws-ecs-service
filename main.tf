@@ -8,7 +8,7 @@ resource "aws_ecs_task_definition" "task" {
       essential         = var.essential
       memory            = var.memory
       memoryReservation = var.memory_reservation
-      mountPoints       = var.readonlyRootFilesystem ? [{ sourceVolume = "tmp", containerPath = "/tmp" }] : []
+      mountPoints       = local.task_def_all_mount_points
       volumesFrom       = []
       linuxParameters = {
         initProcessEnabled = var.init_process_enabled
@@ -29,11 +29,7 @@ resource "aws_ecs_task_definition" "task" {
   })])
 
   dynamic "volume" {
-    for_each = [for efs_vol in var.efs_volumes : {
-      name           = "${var.cluster_name}-${efs_vol.efs_id}"
-      efs_id         = efs_vol.efs_id
-      root_directory = lookup(efs_vol, "root_dir", "/opt/data")
-    }]
+    for_each = local.task_def_efs_volumes
 
     content {
       name = volume.value.name
@@ -89,3 +85,19 @@ resource "aws_ecs_service" "service" {
   }
 }
 
+locals {
+  task_def_ro_mount_points = var.readonlyRootFilesystem ? [{ sourceVolume = "tmp", containerPath = "/tmp" }] : []
+
+  task_def_efs_volumes = [for efs_vol in var.efs_volumes : {
+      name           = "${var.cluster_name}-${efs_vol.efs_id}"
+      efs_id         = efs_vol.efs_id
+      root_directory = lookup(efs_vol, "root_dir", "/mnt/efs")
+    }]
+
+  task_def_efs_mount_points = [for efs_vol in var.efs_volumes : {
+      sourceVolume           = "${var.cluster_name}-${efs_vol.efs_id}"
+      containerPath = lookup(efs_vol, "container_path", "/private_storage")
+    }]
+
+  task_def_all_mount_points = concat(local.task_def_ro_mount_points, local.task_def_efs_mount_points)
+}
