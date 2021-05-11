@@ -134,7 +134,7 @@ locals {
   balanced                     = var.container_port > 0
   load_balancer_container_name = coalesce(var.load_balancer_container_name, var.service_name)
 
-  target_group_names = coalescelist(distinct(compact(concat(var.target_group_names, list(var.target_group_name)))), list(var.cluster_name))
+  target_group_names = coalescelist(distinct(compact(concat(var.target_group_names, tolist(var.target_group_name)))), tolist(var.cluster_name))
 
   default_log_configuration = {
     "logDriver" = "awslogs"
