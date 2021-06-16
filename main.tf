@@ -1,5 +1,11 @@
 resource "aws_ecs_task_definition" "task" {
   family = "${var.cluster_name}-${var.service_name}"
+
+  cpu                = local.use_fargate ? var.cpu : null
+  memory             = local.use_fargate ? var.memory : null
+  execution_role_arn = local.use_fargate ? aws_iam_role.task-execution-role.arn : null
+  network_mode       = local.use_fargate ? "awsvpc" : "bridge"
+
   container_definitions = jsonencode([for s in concat([
     {
       name              = var.service_name
@@ -27,6 +33,8 @@ resource "aws_ecs_task_definition" "task" {
     # load balancer the local.load_balancer_container_name
     portMappings = local.balanced && local.load_balancer_container_name == s.name ? coalescelist(var.port_mappings, local.defaultPortMappings) : []
   })])
+
+  requires_compatibilities = [local.use_fargate ? "FARGATE" : "EC2"]
 
   dynamic "volume" {
     for_each = local.task_def_efs_volumes
@@ -64,14 +72,19 @@ resource "aws_ecs_service" "service" {
   deployment_minimum_healthy_percent = var.deployment_minimum_healthy_percent
   deployment_maximum_percent         = var.deployment_maximum_percent
 
-  ordered_placement_strategy {
-    type  = "spread"
-    field = "attribute:ecs.availability-zone"
-  }
 
-  ordered_placement_strategy {
-    type  = "spread"
-    field = "instanceId"
+  // can't use this for Fargate
+  dynamic "ordered_placement_strategy" {
+    for_each = !local.use_fargate ? [
+      { type = "spread", field = "attribute:ecs.availability-zone" },
+      { type = "spread", field = "instanceId" },
+    ] : []
+    iterator = each
+
+    content {
+      type  = each.value.type
+      field = each.value.field
+    }
   }
 
   dynamic "load_balancer" {
@@ -83,21 +96,47 @@ resource "aws_ecs_service" "service" {
       container_port   = var.container_port
     }
   }
+
+  // Fargate-specifics
+  // For launch_type we use capacity providers in case of Fargate
+  // to utilise Fargate_spot if we need to
+  launch_type = local.use_fargate ? null : "EC2"
+
+  dynamic "capacity_provider_strategy" {
+    for_each = local.use_fargate ? [{}] : []
+
+    content {
+      capacity_provider = var.fargate_spot ? "FARGATE_SPOT" : "FARGATE"
+      weight            = 100
+    }
+  }
+
+  dynamic "network_configuration" {
+    for_each = local.use_fargate ? [{}] : []
+
+    content {
+      subnets         = var.subnet_ids
+      security_groups = var.security_groups
+      // hardcode it for now
+      // otherwise it requires private links everywhere of NAT
+      assign_public_ip = true
+    }
+  }
 }
 
 locals {
   task_def_ro_mount_points = var.readonlyRootFilesystem ? [{ sourceVolume = "tmp", containerPath = "/tmp" }] : []
 
   task_def_efs_volumes = [for efs_vol in var.efs_volumes : {
-      name           = "${var.cluster_name}-${efs_vol.efs_id}"
-      efs_id         = efs_vol.efs_id
-      root_directory = lookup(efs_vol, "root_dir", "/mnt/efs")
-    }]
+    name           = "${var.cluster_name}-${efs_vol.efs_id}"
+    efs_id         = efs_vol.efs_id
+    root_directory = lookup(efs_vol, "root_dir", "/mnt/efs")
+  }]
 
   task_def_efs_mount_points = [for efs_vol in var.efs_volumes : {
-      sourceVolume           = "${var.cluster_name}-${efs_vol.efs_id}"
-      containerPath = lookup(efs_vol, "container_path", "/private_storage")
-    }]
+    sourceVolume  = "${var.cluster_name}-${efs_vol.efs_id}"
+    containerPath = lookup(efs_vol, "container_path", "/private_storage")
+  }]
 
   task_def_all_mount_points = concat(local.task_def_ro_mount_points, local.task_def_efs_mount_points)
 }

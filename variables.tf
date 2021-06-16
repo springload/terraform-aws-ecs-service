@@ -20,6 +20,29 @@ variable "target_group_names" {
   default     = []
 }
 
+variable "fargate" {
+  type        = bool
+  default     = false
+  description = "Indicates it's going to be a Fargate service. Requires FARGATE capability of the cluster"
+}
+
+variable "fargate_spot" {
+  type        = bool
+  default     = false
+  description = "Indicates it's going to be a Fargate spot service. Requires FARGATE_SPOT capability of the cluster"
+}
+
+variable "subnet_ids" {
+  type        = list(string)
+  default     = []
+  description = "List of subnet ids. Required for Fargate tasks as they have to use awsvpc networking"
+}
+
+variable "security_groups" {
+  type        = list(string)
+  default     = []
+  description = "List of security group ids. Required for Fargate tasks as they have to use awsvpc networking"
+}
 
 variable "environment" {
   description = "Enviropnment vars to pass to the container. Note: they will be visible in the task definition, so please don't pass any secrets here."
@@ -152,5 +175,6 @@ locals {
       containerPort = var.container_port
     }
   ]
+  use_fargate = var.fargate || var.fargate_spot
 }
 
