@@ -154,7 +154,7 @@ variable "efs_volumes" {
 }
 
 locals {
-  balanced                     = var.container_port > 0
+  balanced                     = var.container_port > 0 || length(var.port_mappings) > 0
   load_balancer_container_name = coalesce(var.load_balancer_container_name, var.service_name)
 
   target_group_names = coalescelist(distinct(compact(concat(var.target_group_names, [var.target_group_name]))), [var.cluster_name])
@@ -170,11 +170,11 @@ locals {
   log_awslogs       = var.log_configuration["logDriver"] == ""
   log_configuration = local.log_awslogs ? local.default_log_configuration : var.log_configuration
 
-  defaultPortMappings = [
+  port_mappings = coalescelist(var.port_mappings, [
     {
       containerPort = var.container_port
     }
-  ]
+  ])
   use_fargate = var.fargate || var.fargate_spot
 }
 

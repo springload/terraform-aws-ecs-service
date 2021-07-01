@@ -31,7 +31,7 @@ resource "aws_ecs_task_definition" "task" {
       } : {}
     )
     # load balancer the local.load_balancer_container_name
-    portMappings = local.balanced && local.load_balancer_container_name == s.name ? coalescelist(var.port_mappings, local.defaultPortMappings) : []
+    portMappings = local.balanced && local.load_balancer_container_name == s.name ? local.port_mappings : []
   })])
 
   requires_compatibilities = [local.use_fargate ? "FARGATE" : "EC2"]
@@ -88,12 +88,12 @@ resource "aws_ecs_service" "service" {
   }
 
   dynamic "load_balancer" {
-    for_each = local.balanced ? data.aws_lb_target_group.TG[*].arn : []
+    for_each = local.balanced ? zipmap(data.aws_lb_target_group.TG[*].arn, var.port_mappings) : {}
 
     content {
-      target_group_arn = load_balancer.value
+      target_group_arn = load_balancer.key
       container_name   = local.load_balancer_container_name
-      container_port   = var.container_port
+      container_port   = load_balancer.value.containerPort
     }
   }
 
