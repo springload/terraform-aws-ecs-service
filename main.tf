@@ -12,6 +12,7 @@ resource "aws_ecs_task_definition" "task" {
       image             = var.image
       cpu               = var.cpu
       essential         = var.essential
+      links             = var.links
       memory            = var.memory
       memoryReservation = var.memory_reservation
       mountPoints       = local.task_def_all_mount_points

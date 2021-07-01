@@ -51,6 +51,12 @@ variable "environment" {
 
 }
 
+variable "links" {
+  description = "Links the main container to specified ones"
+  type        = list(string)
+  default     = []
+}
+
 variable "image" {
   description = "The Docker image to use"
   type        = string
