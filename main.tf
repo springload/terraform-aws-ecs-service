@@ -67,7 +67,7 @@ resource "aws_ecs_task_definition" "task" {
 
 resource "aws_ecs_service" "service" {
   name                               = var.service_name
-  cluster                            = data.aws_ecs_cluster.main.cluster_name
+  cluster                            = var.cluster_name
   task_definition                    = "${aws_ecs_task_definition.task.family}:${aws_ecs_task_definition.task.revision}"
   desired_count                      = var.desired_count
   deployment_minimum_healthy_percent = var.deployment_minimum_healthy_percent
