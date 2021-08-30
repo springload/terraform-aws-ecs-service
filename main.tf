@@ -89,7 +89,7 @@ resource "aws_ecs_service" "service" {
   }
 
   dynamic "load_balancer" {
-    for_each = local.balanced ? zipmap(data.aws_lb_target_group.TG[*].arn, var.port_mappings) : {}
+    for_each = local.balanced ? zipmap(local.target_group_arns, var.port_mappings) : {}
 
     content {
       target_group_arn = load_balancer.key

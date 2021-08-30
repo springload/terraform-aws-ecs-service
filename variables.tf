@@ -19,7 +19,11 @@ variable "target_group_names" {
   type        = list(string)
   default     = []
 }
-
+variable "target_group_arns" {
+  description = "ARNs of the ALB target groups. Overrides target_group_names."
+  type        = list(string)
+  default     = []
+}
 variable "fargate" {
   type        = bool
   default     = false
@@ -182,5 +186,7 @@ locals {
     }
   ])
   use_fargate = var.fargate || var.fargate_spot
+
+  target_group_arns = local.balanced ? (length(var.target_group_arns) > 0 ? var.target_group_arns : data.aws_lb_target_group.TG[*].arn) : []
 }
 
