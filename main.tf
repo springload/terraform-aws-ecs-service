@@ -101,7 +101,7 @@ resource "aws_ecs_service" "service" {
   // Fargate-specifics
   // For launch_type we use capacity providers in case of Fargate
   // to utilise Fargate_spot if we need to
-  launch_type = local.use_fargate ? null : "EC2"
+  launch_type = local.use_fargate || var.use_default_capacity_provider ? null : "EC2"
 
   dynamic "capacity_provider_strategy" {
     for_each = local.use_fargate ? [{}] : []
@@ -122,6 +122,13 @@ resource "aws_ecs_service" "service" {
       // otherwise it requires private links everywhere of NAT
       assign_public_ip = true
     }
+  }
+
+  lifecycle {
+    // unfortunately we can't ignore it conditionally,
+    // which would be nice if we want to manipulate capacity provider strategies
+    // after creating the service
+    ignore_changes = [capacity_provider_strategy]
   }
 }
 

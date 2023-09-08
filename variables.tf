@@ -157,6 +157,12 @@ variable "user" {
   default     = ""
 }
 
+variable "use_default_capacity_provider" {
+  description = "Use the cluster default capacity provider"
+  type        = bool
+  default     = false
+}
+
 variable "efs_volumes" {
   description = "Optional list of efs volumes, which are a map with {efs_id:, root_dir:}"
   type        = list(map(string))
