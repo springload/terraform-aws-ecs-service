@@ -169,6 +169,12 @@ variable "efs_volumes" {
   default     = []
 }
 
+variable "enable_execute_command" {
+  description = "Specifies whether to enable Amazon ECS Exec for the tasks within the service."
+  type        = bool
+  default     = true
+}
+
 locals {
   balanced                     = var.container_port > 0 || length(var.port_mappings) > 0
   load_balancer_container_name = coalesce(var.load_balancer_container_name, var.service_name)
