@@ -72,6 +72,7 @@ resource "aws_ecs_service" "service" {
   desired_count                      = var.desired_count
   deployment_minimum_healthy_percent = var.deployment_minimum_healthy_percent
   deployment_maximum_percent         = var.deployment_maximum_percent
+  enable_execute_command             = var.enable_execute_command
 
 
   // can't use this for Fargate
