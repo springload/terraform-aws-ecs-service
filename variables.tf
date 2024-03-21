@@ -175,6 +175,12 @@ variable "enable_execute_command" {
   default     = true
 }
 
+variable "log_retention_days" {
+  description = "The number of days to retain log events. Set to 0 for never expire."
+  type        = number
+  default     = 0
+}
+
 locals {
   balanced                     = var.container_port > 0 || length(var.port_mappings) > 0
   load_balancer_container_name = coalesce(var.load_balancer_container_name, var.service_name)
