@@ -175,6 +175,48 @@ variable "enable_execute_command" {
   default     = true
 }
 
+variable "use_fargate_scaling" {
+  description = "Whether to use Fargate scaling policies"
+  type        = bool
+  default     = false
+}
+
+variable "fargate_max_capacity" {
+  description = "The maximum number of tasks for Fargate scaling"
+  type        = number
+  default     = 10
+}
+
+variable "fargate_min_capacity" {
+  description = "The minimum number of tasks for Fargate scaling"
+  type        = number
+  default     = 1
+}
+
+variable "fargate_cpu_target_value" {
+  description = "The target value for CPU utilization in Fargate scaling"
+  type        = number
+  default     = 70
+}
+
+variable "fargate_memory_target_value" {
+  description = "The target value for memory utilization in Fargate scaling"
+  type        = number
+  default     = 75
+}
+
+variable "fargate_scale_by_memory" {
+  description = "Whether to enable memory-based scaling for Fargate"
+  type        = bool
+  default     = true
+}
+
+variable "fargate_scale_by_cpu" {
+  description = "Whether to enable memory-based scaling for Fargate"
+  type        = bool
+  default     = true
+}
+
 locals {
   balanced                     = var.container_port > 0 || length(var.port_mappings) > 0
   load_balancer_container_name = coalesce(var.load_balancer_container_name, var.service_name)
