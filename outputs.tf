@@ -10,3 +10,11 @@ output "task-definition-family" {
 output "task_execution_role_arn" {
   value = aws_iam_role.task-execution-role.arn
 }
+
+output "fargate_spot" {
+  value = var.fargate_spot
+}
+
+output "fargate" {
+  value = var.fargate
+}

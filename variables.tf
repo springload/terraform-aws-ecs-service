@@ -33,7 +33,7 @@ variable "fargate" {
 variable "fargate_spot" {
   type        = bool
   default     = false
-  description = "Indicates it's going to be a Fargate spot service. Requires FARGATE_SPOT capability of the cluster"
+  description = "Indicates it's going to be a Fargate spot service. Reltequires FARGATE_SPOT capability of the cluster"
 }
 
 variable "subnet_ids" {
