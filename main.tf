@@ -109,7 +109,7 @@ resource "aws_ecs_service" "service" {
 
     content {
       capacity_provider = var.fargate_spot ? "FARGATE_SPOT" : "FARGATE"
-      weight            = 100
+      weight            = 1
     }
   }
 
