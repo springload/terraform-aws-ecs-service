@@ -185,12 +185,22 @@ variable "fargate_max_capacity" {
   description = "The maximum number of tasks for ECS service auto-scaling"
   type        = number
   default     = 10
+
+  validation {
+    condition     = var.fargate_max_capacity > 0 && var.fargate_max_capacity >= var.fargate_min_capacity
+    error_message = "Maximum capacity must be greater than 0 and greater than or equal to minimum capacity."
+  }
 }
 
 variable "fargate_min_capacity" {
   description = "The minimum number of tasks for ECS service auto-scaling"
   type        = number
   default     = 1
+
+  validation {
+    condition     = var.fargate_min_capacity >= 0 && var.fargate_min_capacity <= var.fargate_max_capacity
+    error_message = "Minimum capacity must be greater than or equal to 0 and less than or equal to maximum capacity."
+  }
 }
 
 variable "fargate_cpu_target_value" {
@@ -215,6 +225,8 @@ variable "fargate_scale_by_cpu" {
   description = "Whether to enable CPU-based scaling for ECS service"
   type        = bool
   default     = true
+}
+
 variable "log_retention_days" {
   description = "The number of days to retain log events. Set to 0 for never expire."
   type        = number
