@@ -215,6 +215,10 @@ variable "fargate_scale_by_cpu" {
   description = "Whether to enable CPU-based scaling for ECS service"
   type        = bool
   default     = true
+variable "log_retention_days" {
+  description = "The number of days to retain log events. Set to 0 for never expire."
+  type        = number
+  default     = 0
 }
 
 locals {
