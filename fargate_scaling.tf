@@ -6,6 +6,13 @@ resource "aws_appautoscaling_target" "ecs_service" {
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
   depends_on         = [aws_ecs_service.service]
+
+  lifecycle {
+    precondition {
+      condition     = var.fargate_max_capacity >= var.fargate_min_capacity
+      error_message = "Maximum capacity must be greater than or equal to minimum capacity."
+    }
+  }
 }
 
 resource "aws_appautoscaling_policy" "cpu_utilization" {

@@ -187,8 +187,8 @@ variable "fargate_max_capacity" {
   default     = 10
 
   validation {
-    condition     = var.fargate_max_capacity > 0 && var.fargate_max_capacity >= var.fargate_min_capacity
-    error_message = "Maximum capacity must be greater than 0 and greater than or equal to minimum capacity."
+    condition     = var.fargate_max_capacity > 0
+    error_message = "Maximum capacity must be greater than 0."
   }
 }
 
@@ -198,8 +198,8 @@ variable "fargate_min_capacity" {
   default     = 1
 
   validation {
-    condition     = var.fargate_min_capacity >= 0 && var.fargate_min_capacity <= var.fargate_max_capacity
-    error_message = "Minimum capacity must be greater than or equal to 0 and less than or equal to maximum capacity."
+    condition     = var.fargate_min_capacity >= 0
+    error_message = "Minimum capacity must be greater than or equal to 0."
   }
 }
 

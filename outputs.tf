@@ -21,3 +21,8 @@ output "fargate" {
   description = "Whether Fargate launch type is enabled"
   value       = var.fargate
 }
+
+output "log_retention_days" {
+  description = "Number of days to retain log events"
+  value       = var.log_retention_days
+}
