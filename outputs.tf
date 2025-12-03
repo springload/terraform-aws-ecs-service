@@ -7,7 +7,22 @@ output "task-definition-family" {
   value       = aws_ecs_task_definition.task.family
 }
 
-# that could be usefull fot the fargate later
 output "task_execution_role_arn" {
-  value = aws_iam_role.task-execution-role.arn
+  description = "ARN of the task execution role used by the ECS service"
+  value       = aws_iam_role.task-execution-role.arn
+}
+
+output "fargate_spot" {
+  description = "Whether Fargate Spot launch type is enabled"
+  value       = var.fargate_spot
+}
+
+output "fargate" {
+  description = "Whether Fargate launch type is enabled"
+  value       = var.fargate
+}
+
+output "log_retention_days" {
+  description = "Number of days to retain log events"
+  value       = var.log_retention_days
 }

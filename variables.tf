@@ -49,7 +49,7 @@ variable "security_groups" {
 }
 
 variable "environment" {
-  description = "Enviropnment vars to pass to the container. Note: they will be visible in the task definition, so please don't pass any secrets here."
+  description = "Environment vars to pass to the container. Note: they will be visible in the task definition, so please don't pass any secrets here."
   type        = map(any)
   default     = {}
 
@@ -73,7 +73,7 @@ variable "cpu" {
 }
 
 variable "essential" {
-  description = "Exit the task if contaner exits"
+  description = "Exit the task if container exits"
   type        = bool
   default     = true
 }
@@ -131,12 +131,12 @@ variable "readonlyRootFilesystem" {
 }
 
 variable "deployment_minimum_healthy_percent" {
-  description = "Minimum number of healty contianers during deployments"
+  description = "Minimum number of healthy containers during deployments"
   default     = 50
 }
 
 variable "deployment_maximum_percent" {
-  description = "Maximum number of healty contianers during deployments"
+  description = "Maximum number of healthy containers during deployments"
   default     = 200
 }
 
@@ -146,7 +146,7 @@ variable "desired_count" {
 }
 
 variable "init_process_enabled" {
-  description = "Use embdedded to Docker tini init process that correctly reaps zombie processes"
+  description = "Use embedded Docker tini init process that correctly reaps zombie processes"
   type        = bool
   default     = true
 }
@@ -171,6 +171,58 @@ variable "efs_volumes" {
 
 variable "enable_execute_command" {
   description = "Specifies whether to enable Amazon ECS Exec for the tasks within the service."
+  type        = bool
+  default     = true
+}
+
+variable "use_fargate_scaling" {
+  description = "Whether to use ECS service auto-scaling policies (works for both Fargate and EC2 launch types)"
+  type        = bool
+  default     = false
+}
+
+variable "fargate_max_capacity" {
+  description = "The maximum number of tasks for ECS service auto-scaling"
+  type        = number
+  default     = 10
+
+  validation {
+    condition     = var.fargate_max_capacity > 0
+    error_message = "Maximum capacity must be greater than 0."
+  }
+}
+
+variable "fargate_min_capacity" {
+  description = "The minimum number of tasks for ECS service auto-scaling"
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.fargate_min_capacity >= 0
+    error_message = "Minimum capacity must be greater than or equal to 0."
+  }
+}
+
+variable "fargate_cpu_target_value" {
+  description = "The target value for CPU utilization in ECS service auto-scaling"
+  type        = number
+  default     = 70
+}
+
+variable "fargate_memory_target_value" {
+  description = "The target value for memory utilization in ECS service auto-scaling"
+  type        = number
+  default     = 75
+}
+
+variable "fargate_scale_by_memory" {
+  description = "Whether to enable memory-based scaling for ECS service"
+  type        = bool
+  default     = true
+}
+
+variable "fargate_scale_by_cpu" {
+  description = "Whether to enable CPU-based scaling for ECS service"
   type        = bool
   default     = true
 }
@@ -207,4 +259,3 @@ locals {
 
   target_group_arns = local.balanced ? (length(var.target_group_arns) > 0 ? var.target_group_arns : data.aws_lb_target_group.TG[*].arn) : []
 }
-
