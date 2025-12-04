@@ -176,24 +176,24 @@ variable "enable_execute_command" {
 }
 
 variable "use_fargate_scaling" {
-  description = "Whether to use ECS service auto-scaling policies (works for both Fargate and EC2 launch types)"
+  description = "Whether to use ECS service auto-scaling policies. Tested with Fargate; should work with EC2 but not verified."
   type        = bool
   default     = false
 }
 
 variable "fargate_max_capacity" {
-  description = "The maximum number of tasks for ECS service auto-scaling"
+  description = "The maximum number of tasks for ECS service auto-scaling. AWS requires this to be at least 1. To scale to 0, set min_capacity to 0 and disable autoscaling, or set desired_count to 0 directly."
   type        = number
   default     = 10
 
   validation {
     condition     = var.fargate_max_capacity > 0
-    error_message = "Maximum capacity must be greater than 0."
+    error_message = "Maximum capacity must be greater than 0 (AWS Application Auto Scaling requirement). To scale to 0, set min_capacity to 0 and disable autoscaling, or set desired_count to 0."
   }
 }
 
 variable "fargate_min_capacity" {
-  description = "The minimum number of tasks for ECS service auto-scaling"
+  description = "The minimum number of tasks for ECS service auto-scaling. Set to 0 to allow scaling down to zero tasks."
   type        = number
   default     = 1
 
@@ -212,7 +212,7 @@ variable "fargate_cpu_target_value" {
 variable "fargate_memory_target_value" {
   description = "The target value for memory utilization in ECS service auto-scaling"
   type        = number
-  default     = 75
+  default     = 85
 }
 
 variable "fargate_scale_by_memory" {
